@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3000 } = process.env;
 
 app.all('*', (req, res) => {
   res.status(404).send({ message: 'Путь не найден' });
