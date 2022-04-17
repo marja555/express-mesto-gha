@@ -22,12 +22,12 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
 
-const port = 3001;
+const { PORT = 3001 } = process.env;
 
-// app.get('/', (req, res) => {
-//   res.send('Hello World!');
-// });
+app.all('*', (req, res) => {
+  res.status(404).send({ message: 'Путь не найден' });
+});
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });

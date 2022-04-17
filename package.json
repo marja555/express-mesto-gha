@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evgeniydukhanov/express-mesto-gha.git"
+    "url": "git+https://github.com/marja555/express-mesto-gha.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/evgeniydukhanov/express-mesto-gha/issues"
+    "url": "https://github.com/marja555/express-mesto-gha/issues"
   },
-  "homepage": "https://github.com/evgeniydukhanov/express-mesto-gha#readme",
+  "homepage": "https://github.com/marja555/express-mesto-gha#readme",
   "devDependencies": {
     "eslint": "^8.13.0",
     "eslint-config-airbnb": "^19.0.4",
