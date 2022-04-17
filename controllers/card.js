@@ -4,8 +4,18 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: 'Такой карточки не существует' });
+      }
+      return res.send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Не удалось создать карточку' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 const getCards = (req, res) => {
@@ -20,7 +30,7 @@ const deleteCard = (req, res) => {
       if (!card) {
         return res
           .status(404)
-          .send({ message: 'Карточки с таким ID не существует' });
+          .send({ message: 'Такой карточки не существует' });
       }
       return res.send(card);
     })
