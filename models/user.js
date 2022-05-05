@@ -1,6 +1,6 @@
-const res = require('express/lib/response');
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
+const isURL = require('validator');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (v) => isURL(v),
+      message: 'Неверная ссылка',
+    },
   },
   email: {
     type: String,
@@ -33,11 +37,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 8,
+    select: false,
   },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  this.User.findOne({ email })
+  return this.findOne({ email }, { runValidators: true })
+    .select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные имя пользователя или пароль'));
@@ -48,13 +54,8 @@ userSchema.statics.findUserByCredentials = function (email, password) {
             return Promise.reject(new Error('Неправильные логин или пароль'));
           }
           return user;
-        })
-        .catch((err) => {
-          res.status(401).send({ message: err.message });
         });
-    })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
     });
 };
+
 module.exports = mongoose.model('user', userSchema);

@@ -77,15 +77,27 @@ const updateAvatar = (req, res) => {
 };
 
 const login = (req, res) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-word', { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: true,
+      });
       res.send({ token });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
     });
+};
+
+const getMe = (req, res, next) => {
+  const { _id } = req.user;
+  User.find({ _id })
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 module.exports = {
@@ -95,4 +107,5 @@ module.exports = {
   updateProfile,
   updateAvatar,
   login,
+  getMe,
 };
