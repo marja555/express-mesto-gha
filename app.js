@@ -3,6 +3,8 @@ const { default: mongoose } = require('mongoose');
 const cookieParser = require('cookie-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 
+const { PORT = 3000 } = process.env;
+
 const app = express();
 
 const bodyParser = require('body-parser');
@@ -20,14 +22,14 @@ const auth = require('./middlewares/auth');
 const { handleError } = require('./errors/handleError');
 
 app.post('/signin', celebrate({
-  body: Joi.object.keys({
+  body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 }), login);
 
 app.post('/signup', celebrate({
-  body: Joi.object.keys({
+  body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
@@ -45,8 +47,6 @@ app.use('/', (req, res, next) => {
 });
 app.use(errors());
 app.use(handleError);
-
-const { PORT = 3000 } = process.env;
 
 // app.all('*', (req, res) => {
 //   res.status(404).send({ message: 'Путь не найден' });
