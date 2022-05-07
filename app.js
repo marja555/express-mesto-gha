@@ -37,20 +37,18 @@ app.post('/signup', celebrate({
     avatar: Joi.string().pattern(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/),
   }),
 }), createUser);
+
 app.use(auth);
 
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
 
-app.use('/', (req, res, next) => {
-  next(new NotFoundError('Запрашиваемый ресурс не найден'));
-});
 app.use(errors());
 app.use(handleError);
 
-// app.all('*', (req, res) => {
-//   res.status(404).send({ message: 'Путь не найден' });
-// });
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
