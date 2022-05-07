@@ -68,7 +68,7 @@ const dislikeCard = (req, res, next) => {
       if (!card) {
         next(new NotFoundError('Такой карточки не существует'));
       }
-      return res.send(card);
+      return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
