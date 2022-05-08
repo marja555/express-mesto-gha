@@ -43,12 +43,12 @@ app.use(auth);
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
 
-app.use(errors());
-app.use(handleError);
-
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
+
+app.use(errors());
+app.use(handleError);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
