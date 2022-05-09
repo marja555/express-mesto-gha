@@ -29,25 +29,21 @@ const getCards = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  const { cardId } = req.params;
+  Card.findById(cardId)
+    .orFail(() => new NotFoundError('Такой карточки не существует'))
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ForbiddenError('Нельзя удалять чужие карточки'));
       }
-      if (req.user._id !== card.owner._id.toString()) {
-        next(new ForbiddenError('Нельзя удалять чужие карточки'));
-      }
-      return card;
+      return card.remove()
+        .then(() => res.status(200).send({ message: 'Карточка удалена', data: card }));
     })
-    .then((card) => Card.findByIdAndRemove(card._id.toString()))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Переданы некорректные данные'));
-      } else if (err.statusCode === 404 || err.name === 'NotFoundError') {
-        next(new NotFoundError('Карточка с указанным _id не найдена'));
-      } else {
-        next(err);
       }
+      next(err);
     });
 };
 
