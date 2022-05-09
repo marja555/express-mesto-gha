@@ -9,6 +9,7 @@ const app = express();
 
 const bodyParser = require('body-parser');
 const NotFoundError = require('./errors/NotFoundError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,6 +21,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const { handleError } = require('./errors/handleError');
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -46,6 +49,8 @@ app.use('/cards', require('./routes/card'));
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 app.use(handleError);

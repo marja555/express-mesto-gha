@@ -16,8 +16,9 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -28,21 +29,25 @@ const getCards = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         next(new NotFoundError('Карточка не найдена'));
       }
-      if (card.owner._id.toString() !== req.user._id) {
+      if (req.user._id !== card.owner._id.toString()) {
         next(new ForbiddenError('Нельзя удалять чужие карточки'));
       }
-      return res.send(card);
+      return card;
     })
+    .then((card) => Card.findByIdAndRemove(card._id.toString()))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Переданы некорректные данные'));
+      } else if (err.statusCode === 404 || err.name === 'NotFoundError') {
+        next(new NotFoundError('Карточка с указанным _id не найдена'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -50,15 +55,18 @@ const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Такой карточки не существует'));
+        return next(new NotFoundError('Такой карточки не существует'));
       }
       return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Переданы некорректные данные'));
+      } else if (err.statusCode === 404 || err.name === 'NotFoundError') {
+        next(new NotFoundError('Передан несуществующий _id карточки'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -66,15 +74,18 @@ const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Такой карточки не существует'));
+        return next(new NotFoundError('Такой карточки не существует'));
       }
       return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Переданы некорректные данные'));
+      } else if (err.statusCode === 404 || err.name === 'NotFoundError') {
+        next(new NotFoundError('Передан несуществующий _id карточки'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
